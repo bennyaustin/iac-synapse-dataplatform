@@ -34,7 +34,8 @@ resource synapse_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = {
   }
 }
 
-// Deploy Synapse using module
+// Deploy dataplatform using module
+// Deploys Synapse Analytics Workspace, Datalake, Firewall rules, Keyvault with access policies
 module synapse_dp './modules/synapse-dataplatform.bicep' = {
   name: deployment_name
   scope: synapse_rg
@@ -46,6 +47,10 @@ module synapse_dp './modules/synapse-dataplatform.bicep' = {
     synapse_workspace_name: 'ba-synapse01'
     synapse_datalake_name: 'badatalake01'
     synapse_datalake_sku: 'Standard_LRS'
+    dataplatform_keyvault_name: 'ba-kv01'
+    synapse_sqlpool_name: 'dwh01'
+    sqlpool_sku: 'DW100c'
+
   }
   
 }

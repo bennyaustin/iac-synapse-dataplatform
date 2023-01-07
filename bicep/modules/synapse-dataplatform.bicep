@@ -30,11 +30,112 @@ param synapse_datalake_name string
 ])
 param synapse_datalake_sku string ='Standard_LRS'
 
+@description('Key Vault name')
+param dataplatform_keyvault_name string
+
+@description('Dedicated SQL Pool Name')
+param synapse_sqlpool_name string
+
+@description('Dedicated SQL Pool Name')
+@allowed([
+  'DW100c'
+  'DW200c'
+  'DW300c'
+  'DW400c'
+  'DW500c'
+  'DW1000c'
+  'DW1500c'
+  'DW2000c'
+  'DW2500c'
+  'DW3000c'
+  ])
+param sqlpool_sku string = 'DW100c'
+
+@description('Synapse Spark Pool dictionary object')
+param spark_pools object ={
+
+  pool1:{
+    name: 'smallMO'
+    maxNodeCount: 4
+    minNodeCount: 3
+    nodeSize: 'Small'
+    nodeSizeFamily: 'MemoryOptimized'
+    sparkVersion: '3.2'
+  }
+  pool2:{
+    name: 'mediumMO'
+    maxNodeCount: 8
+    minNodeCount: 4
+    nodeSize: 'Medium'
+    nodeSizeFamily: 'MemoryOptimized'
+    sparkVersion: '3.2'
+  }
+  pool3:{
+    name: 'largeMO'
+    maxNodeCount: 12
+    minNodeCount: 6
+    nodeSize: 'Large'
+    nodeSizeFamily: 'MemoryOptimized'
+    sparkVersion: '3.2'
+  }
+  pool4:{
+    name: 'xlargeMO'
+    maxNodeCount: 16
+    minNodeCount: 8
+    nodeSize: 'XLarge'
+    nodeSizeFamily: 'MemoryOptimized'
+    sparkVersion: '3.2'
+  }
+  pool5:{
+    name: 'xxlargeMO'
+    maxNodeCount: 24
+    minNodeCount: 12
+    nodeSize: 'XXLarge'
+    nodeSizeFamily: 'MemoryOptimized'
+    sparkVersion: '3.2'
+  }
+  pool6:{
+    name: 'smallGPU'
+    maxNodeCount: 4
+    minNodeCount: 3
+    nodeSize: 'Small'
+    nodeSizeFamily: 'HardwareAcceleratedGPU'
+    sparkVersion: '3.2'
+  }
+  pool7:{
+    name: 'mediumGPU'
+    maxNodeCount: 8
+    minNodeCount: 4
+    nodeSize: 'Medium'
+    nodeSizeFamily: 'HardwareAcceleratedGPU'
+    sparkVersion: '3.2'
+  }
+  pool8:{
+    name: 'largeGPU'
+    maxNodeCount: 12
+    minNodeCount: 6
+    nodeSize: 'Large'
+    nodeSizeFamily: 'HardwareAcceleratedGPU'
+    sparkVersion: '3.2'  
+  }
+  pool9:{
+    name: 'xlargeGPU'
+    maxNodeCount: 16
+    minNodeCount: 8
+    nodeSize: 'XLarge'
+    nodeSizeFamily: 'HardwareAcceleratedGPU'
+    sparkVersion: '3.2' 
+  }
+}
+
+
+
 // Variables
-var suffix = uniqueString(subscription().subscriptionId)
+var suffix = uniqueString(resourceGroup().id)
 var synapse_workspace_uniquename = '${synapse_workspace_name}-${suffix}'
-var managed_synapse_rg_name = 'mrg_synapse_${resourceGroup().name}'
+var managed_synapse_rg_name = 'mrg_${synapse_workspace_uniquename}'
 var synapse_datalake_uniquename = substring('${synapse_datalake_name}${suffix}',0,24)
+var dataplatform_keyvault_uniquename = '${dataplatform_keyvault_name}-${suffix}'
 
 // Create datalake linked to synapse workspace
 resource synapse_storage 'Microsoft.Storage/storageAccounts@2022-09-01' ={
@@ -86,3 +187,76 @@ resource synapse_workspace_firewallRules 'Microsoft.Synapse/workspaces/firewallR
     startIpAddress: '0.0.0.0'
   }
 }
+
+// Create Key Vault
+resource dataplatform_keyvault 'Microsoft.KeyVault/vaults@2022-07-01' ={
+  name: dataplatform_keyvault_uniquename
+  location: location
+  tags: {
+    CostCentre: cost_centre_tag
+    Owner: owner_tag
+    SME: sme_tag
+  }
+  properties:{
+    tenantId: reference(synapse_workspace.id,'2021-06-01','Full').identity.tenantId
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    accessPolicies:[
+      { tenantId: reference(synapse_workspace.id,'2021-06-01','Full').identity.tenantId
+        objectId: reference(synapse_workspace.id,'2021-06-01','Full').identity.principalId
+        permissions: { secrets:  ['list','get']}
+
+      }
+    ]
+  }
+}
+
+// Create Dedicated SQL Pool
+resource synapse_sqlpool_dwh 'Microsoft.Synapse/workspaces/sqlPools@2021-06-01' = {
+  name: synapse_sqlpool_name
+  location: location
+  parent: synapse_workspace
+  tags: {
+    CostCentre: cost_centre_tag
+    Owner: owner_tag
+    SME: sme_tag
+  }
+  sku:{ name: sqlpool_sku  }
+}
+
+// Enable Transparent Data Encryption
+resource symbolicname 'Microsoft.Synapse/workspaces/sqlPools/transparentDataEncryption@2021-06-01' = {
+  name: 'current'
+  parent: synapse_sqlpool_dwh
+  properties: {
+    status: 'Enabled'
+  }
+}
+
+//Create Spark Pool
+resource synapse_spark_pool 'Microsoft.Synapse/workspaces/bigDataPools@2021-06-01' = [for spark_pool in items(spark_pools):{
+  name: spark_pool.value.name
+  location: location
+  parent: synapse_workspace
+  tags: {
+    CostCentre: cost_centre_tag
+    Owner: owner_tag
+    SME: sme_tag
+  }
+  properties: {
+    autoPause: {
+      delayInMinutes: 10
+      enabled: true
+    }
+    autoScale: {
+      enabled: true
+      maxNodeCount: spark_pool.value.maxNodeCount
+      minNodeCount: spark_pool.value.minNodeCount
+    }
+    nodeSize: spark_pool.value.nodeSize
+    nodeSizeFamily: spark_pool.value.nodeSizeFamily
+    sparkVersion: spark_pool.value.sparkVersion
+  }
+}]
