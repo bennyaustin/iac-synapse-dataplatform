@@ -91,8 +91,10 @@ module synapse_dp './modules/synapse-dataplatform.bicep' = {
     dataplatform_keyvault_name: 'ba-kv01'
     synapse_sqlpool_name: 'dwh01'
     sqlpool_sku: 'DW100c'
+    enable_purview: true
     purview_resourceid: purview.outputs.purview_resourceid
-
+    purview_resource: purview.outputs.purview_resource
+    
   }
   
 }
