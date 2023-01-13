@@ -8,7 +8,7 @@ param cost_centre_tag string
 @description('System Owner tag that will be applied to all resources in this deployment')
 param owner_tag string
 
-@description('Subject Matter EXpert (SME) tag that will be applied to all resources in this deployment')
+@description('Subject Matter Expert (SME) tag that will be applied to all resources in this deployment')
 param sme_tag string
 
 @description('Synapse workspace name')
@@ -128,7 +128,8 @@ param spark_pools object ={
   }
 }
 
-
+@description('Resource id of Purview that will be linked to this Synapse Workspace')
+param purview_resourceid string 
 
 // Variables
 var suffix = uniqueString(resourceGroup().id)
@@ -175,6 +176,9 @@ resource synapse_workspace 'Microsoft.Synapse/workspaces@2021-06-01'= {
             filesystem: synapse_storage.properties.primaryEndpoints.file
           }
         trustedServiceBypassEnabled: true
+        purviewConfiguration:{
+          purviewResourceId: purview_resourceid
+        }
         }
 }
 
