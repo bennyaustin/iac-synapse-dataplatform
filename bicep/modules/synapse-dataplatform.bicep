@@ -286,11 +286,11 @@ resource readerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-0
 }
 
 resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
-  name: guid(resourceGroup().id,purview_resource.id,contributorRoleDefinition.id)
+  name: guid(resourceGroup().id,purview_resource.identity.principalId,contributorRoleDefinition.id)
   scope: synapse_storage
   properties:{
     principalType: 'ServicePrincipal'
-    principalId: reference(purview_resource.id,'2021-07-01','Full').identity.principalId
+    principalId: purview_resource.identity.principalId
     roleDefinitionId: readerRoleDefinition.id
   }
 }
