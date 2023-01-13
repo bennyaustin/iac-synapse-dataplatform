@@ -64,7 +64,7 @@ module purview './modules/purview.bicep' = {
   scope: purview_rg
   params:{
     create_purview: true
-    enable_purview: true
+    purviewrg: purviewrg
     purview_name: purview_name
     location: purview_rg.location
     cost_centre_tag: cost_centre_tag
@@ -91,8 +91,10 @@ module synapse_dp './modules/synapse-dataplatform.bicep' = {
     dataplatform_keyvault_name: 'ba-kv01'
     synapse_sqlpool_name: 'dwh01'
     sqlpool_sku: 'DW100c'
+    enable_purview: enable_purview
     purview_resourceid: purview.outputs.purview_resourceid
-
+    purview_resource: purview.outputs.purview_resource
+    
   }
   
 }

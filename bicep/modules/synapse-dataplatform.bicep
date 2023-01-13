@@ -128,6 +128,12 @@ param spark_pools object ={
   }
 }
 
+@description('Flag to indicate whether to enable integration of data platform resources with either an existing or new Purview resource')
+param enable_purview bool
+
+@description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
+param purview_resource object
+
 @description('Resource id of Purview that will be linked to this Synapse Workspace')
 param purview_resourceid string 
 
@@ -137,6 +143,7 @@ var synapse_workspace_uniquename = '${synapse_workspace_name}-${suffix}'
 var managed_synapse_rg_name = 'mrg_${synapse_workspace_uniquename}'
 var synapse_datalake_uniquename = substring('${synapse_datalake_name}${suffix}',0,24)
 var dataplatform_keyvault_uniquename = '${dataplatform_keyvault_name}-${suffix}'
+
 
 // Create datalake linked to synapse workspace
 resource synapse_storage 'Microsoft.Storage/storageAccounts@2022-09-01' ={
@@ -177,7 +184,7 @@ resource synapse_workspace 'Microsoft.Synapse/workspaces@2021-06-01'= {
           }
         trustedServiceBypassEnabled: true
         purviewConfiguration:{
-          purviewResourceId: purview_resourceid
+          purviewResourceId: enable_purview ? purview_resourceid : null
         }
         }
 }
@@ -264,3 +271,26 @@ resource synapse_spark_pool 'Microsoft.Synapse/workspaces/bigDataPools@2021-06-0
     sparkVersion: spark_pool.value.sparkVersion
   }
 }]
+
+// Grant roles to Purview
+@description('This is the built-in Contributor role. See https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#contributor')
+resource contributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
+}
+
+@description('This is the built-in Reader role. See https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#contributor')
+resource readerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+}
+
+resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
+  name: guid(resourceGroup().id,purview_resource.identity.principalId,contributorRoleDefinition.id)
+  scope: synapse_storage
+  properties:{
+    principalType: 'ServicePrincipal'
+    principalId: purview_resource.identity.principalId
+    roleDefinitionId: readerRoleDefinition.id
+  }
+}
