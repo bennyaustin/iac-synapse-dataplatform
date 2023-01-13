@@ -52,3 +52,4 @@ resource purview_account 'Microsoft.Purview/accounts@2021-07-01'= if (create_pur
   output purview_account_name string = create_purview ? purview_account.name: existing_purview_account.name
   output purview_resourceid string = create_purview ? purview_account.id: existing_purview_account.id
   output purview_resource object = create_purview ? purview_account: existing_purview_account
+ 
