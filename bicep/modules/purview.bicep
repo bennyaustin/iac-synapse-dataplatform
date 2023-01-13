@@ -2,11 +2,11 @@
 @description('Flag to indicate whether to create a new Purview resource with this data platform deployment')
 param create_purview bool
 
-@description('Flag to indicate whether to enable integration of data platform resources with either an existing or new Purview resource')
-param enable_purview bool
-
 @description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
 param purview_name string
+
+@description('Resource group where Purview will be deployed. Resource group will be created if it doesnt exist')
+param purviewrg string
 
 @description('Location where resources will be deployed. Defaults to resource group location')
 param location string = resourceGroup().location
@@ -46,6 +46,7 @@ resource purview_account 'Microsoft.Purview/accounts@2021-07-01'= if (create_pur
   
   resource existing_purview_account 'Microsoft.Purview/accounts@2021-07-01' existing = if (!create_purview) {
     name: purview_name
+    scope: resourceGroup(purviewrg)
   }
 
   output purview_account_name string = create_purview ? purview_account.name: existing_purview_account.name

@@ -64,7 +64,7 @@ module purview './modules/purview.bicep' = {
   scope: purview_rg
   params:{
     create_purview: true
-    enable_purview: true
+    purviewrg: purviewrg
     purview_name: purview_name
     location: purview_rg.location
     cost_centre_tag: cost_centre_tag
