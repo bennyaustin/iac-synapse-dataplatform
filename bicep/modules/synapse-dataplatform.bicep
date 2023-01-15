@@ -214,6 +214,7 @@ resource dataplatform_keyvault 'Microsoft.KeyVault/vaults@2022-07-01' ={
       family: 'A'
       name: 'standard'
     }
+    enabledForTemplateDeployment: true
     accessPolicies:[
       { tenantId: reference(synapse_workspace.id,'2021-06-01','Full').identity.tenantId
         objectId: reference(synapse_workspace.id,'2021-06-01','Full').identity.principalId
@@ -294,3 +295,6 @@ resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04
     roleDefinitionId: readerRoleDefinition.id
   }
 }
+
+
+output keyvault_name string = dataplatform_keyvault.name
