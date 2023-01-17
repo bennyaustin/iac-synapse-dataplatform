@@ -33,6 +33,14 @@ param synapse_datalake_sku string ='Standard_LRS'
 @description('Key Vault name')
 param dataplatform_keyvault_name string
 
+@description('SQL Administrator User Name')
+@secure()
+param sqladmin_username string
+
+@description('SQL Administrator password')
+@secure()
+param sqladmin_password string
+
 @description('Dedicated SQL Pool Name')
 param synapse_sqlpool_name string
 
@@ -142,7 +150,6 @@ var suffix = uniqueString(resourceGroup().id)
 var synapse_workspace_uniquename = '${synapse_workspace_name}-${suffix}'
 var managed_synapse_rg_name = 'mrg_${synapse_workspace_uniquename}'
 var synapse_datalake_uniquename = substring('${synapse_datalake_name}${suffix}',0,24)
-var dataplatform_keyvault_uniquename = '${dataplatform_keyvault_name}-${suffix}'
 
 
 // Create datalake linked to synapse workspace
@@ -183,9 +190,9 @@ resource synapse_workspace 'Microsoft.Synapse/workspaces@2021-06-01'= {
             filesystem: synapse_storage.properties.primaryEndpoints.file
           }
         trustedServiceBypassEnabled: true
-        purviewConfiguration:{
-          purviewResourceId: enable_purview ? purview_resourceid : null
-        }
+        purviewConfiguration:{ purviewResourceId: enable_purview ? purview_resourceid : null }
+        sqlAdministratorLogin: sqladmin_username
+        sqlAdministratorLoginPassword: sqladmin_password
         }
 }
 
@@ -199,23 +206,18 @@ resource synapse_workspace_firewallRules 'Microsoft.Synapse/workspaces/firewallR
   }
 }
 
-// Create Key Vault
-resource dataplatform_keyvault 'Microsoft.KeyVault/vaults@2022-07-01' ={
-  name: dataplatform_keyvault_uniquename
-  location: location
-  tags: {
-    CostCentre: cost_centre_tag
-    Owner: owner_tag
-    SME: sme_tag
-  }
-  properties:{
-    tenantId: reference(synapse_workspace.id,'2021-06-01','Full').identity.tenantId
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
-    accessPolicies:[
-      { tenantId: reference(synapse_workspace.id,'2021-06-01','Full').identity.tenantId
+// Create Key Vault Access Policies
+resource dataplatform_keyvault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: dataplatform_keyvault_name
+  scope: resourceGroup()
+}
+
+resource synapse_keyvault_accesspolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
+  name: 'add'
+  parent: dataplatform_keyvault
+  properties: {
+    accessPolicies: [
+      { tenantId: subscription().tenantId
         objectId: reference(synapse_workspace.id,'2021-06-01','Full').identity.principalId
         permissions: { secrets:  ['list','get']}
 
@@ -238,7 +240,7 @@ resource synapse_sqlpool_dwh 'Microsoft.Synapse/workspaces/sqlPools@2021-06-01' 
 }
 
 // Enable Transparent Data Encryption
-resource symbolicname 'Microsoft.Synapse/workspaces/sqlPools/transparentDataEncryption@2021-06-01' = {
+resource synapse_tde 'Microsoft.Synapse/workspaces/sqlPools/transparentDataEncryption@2021-06-01' = {
   name: 'current'
   parent: synapse_sqlpool_dwh
   properties: {

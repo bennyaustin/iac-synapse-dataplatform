@@ -35,6 +35,7 @@ param purview_name string = 'ba-purview01'
 // Variables
 var synapse_deployment_name = 'synapse_dataplatform_deployment_${deployment_suffix}'
 var purview_deployment_name = 'purview_deployment_${deployment_suffix}'
+var keyvault_deployment_name = 'keyvault_deployment_${deployment_suffix}'
 
 // Create data platform resource group
 resource synapse_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = {
@@ -46,6 +47,7 @@ resource synapse_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = {
         SME: sme_tag
   }
 }
+
 
 // Create purview resource group
 resource purview_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = if (create_purview) {
@@ -59,7 +61,7 @@ resource purview_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = if (creat
  }
 
  // Deploy Purview using module
-module purview './modules/purview.bicep' = {
+module purview './modules/purview.bicep' = if (create_purview) {
   name: purview_deployment_name
   scope: purview_rg
   params:{
@@ -74,6 +76,23 @@ module purview './modules/purview.bicep' = {
   
 }
 
+// Deploy Key Vault with default access policies using module
+module kv './modules/keyvault.bicep' = {
+  name: keyvault_deployment_name
+  scope: synapse_rg
+  params:{
+     location: synapse_rg.location
+     keyvault_name: 'ba-kv01'
+     cost_centre_tag: cost_centre_tag
+     owner_tag: owner_tag
+     sme_tag: sme_tag
+  }
+}
+
+resource kv_ref 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: kv.outputs.keyvault_name
+  scope: synapse_rg
+}
 
 // Deploy dataplatform using module
 // Deploys Synapse Analytics Workspace, Datalake, Firewall rules, Keyvault with access policies
@@ -88,7 +107,9 @@ module synapse_dp './modules/synapse-dataplatform.bicep' = {
     synapse_workspace_name: 'ba-synapse01'
     synapse_datalake_name: 'badatalake01'
     synapse_datalake_sku: 'Standard_LRS'
-    dataplatform_keyvault_name: 'ba-kv01'
+    sqladmin_username: kv_ref.getSecret('sqlserver-admin-username')
+    sqladmin_password: kv_ref.getSecret('sqlserver-admin-password')
+    dataplatform_keyvault_name: kv.outputs.keyvault_name
     synapse_sqlpool_name: 'dwh01'
     sqlpool_sku: 'DW100c'
     enable_purview: enable_purview
