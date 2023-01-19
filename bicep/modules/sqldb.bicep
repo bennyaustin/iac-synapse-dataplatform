@@ -69,6 +69,15 @@ resource sqlserver 'Microsoft.Sql/servers@2022-05-01-preview' ={
   }
 }
 
+// Create firewall rule to Allow Azure services and resources to access this SQL Server
+resource allowAzure_Firewall 'Microsoft.Sql/servers/firewallRules@2021-11-01' ={
+  name: 'AllowAllWindowsAzureIps'
+  parent: sqlserver
+  properties:{
+    startIpAddress:'0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
 // Deploy database
 resource database 'Microsoft.Sql/servers/databases@2021-11-01' ={
   name: database_name
