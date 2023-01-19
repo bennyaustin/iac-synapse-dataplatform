@@ -145,12 +145,14 @@ param purview_resource object
 @description('Resource id of Purview that will be linked to this Synapse Workspace')
 param purview_resourceid string 
 
+@description('Synapse Workspace Administrator Group ObjectID/SID')
+param synapse_workspace_admin_sid string
+
 // Variables
 var suffix = uniqueString(resourceGroup().id)
 var synapse_workspace_uniquename = '${synapse_workspace_name}-${suffix}'
 var managed_synapse_rg_name = 'mrg_${synapse_workspace_uniquename}'
 var synapse_datalake_uniquename = substring('${synapse_datalake_name}${suffix}',0,24)
-
 
 // Create datalake linked to synapse workspace
 resource synapse_storage 'Microsoft.Storage/storageAccounts@2022-09-01' ={
@@ -210,6 +212,7 @@ resource synapse_workspace_firewallRules 'Microsoft.Synapse/workspaces/firewallR
 resource dataplatform_keyvault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: dataplatform_keyvault_name
   scope: resourceGroup()
+
 }
 
 resource synapse_keyvault_accesspolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
@@ -223,6 +226,17 @@ resource synapse_keyvault_accesspolicy 'Microsoft.KeyVault/vaults/accessPolicies
 
       }
     ]
+  }
+}
+
+// Create Synapse Workspace administrator 
+resource synapse_workspace_admin 'Microsoft.Synapse/workspaces/administrators@2021-06-01' ={
+  name: 'activeDirectory'
+  parent: synapse_workspace
+  properties:{
+    administratorType: 'ActiveDirectory'
+    sid: synapse_workspace_admin_sid
+    tenantId: subscription().tenantId
   }
 }
 
