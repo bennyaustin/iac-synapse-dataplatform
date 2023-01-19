@@ -288,7 +288,7 @@ resource synapse_spark_pool 'Microsoft.Synapse/workspaces/bigDataPools@2021-06-0
   }
 }]
 
-// Grant roles to Purview
+// Role Assignment
 @description('This is the built-in Contributor role. See https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#contributor')
 resource contributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
   scope: subscription()
@@ -301,8 +301,9 @@ resource readerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-0
   name: 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
 }
 
+// Grant Purview reader roles to Datalake
 resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
-  name: guid(resourceGroup().id,purview_resource.identity.principalId,contributorRoleDefinition.id)
+  name: guid(resourceGroup().id,purview_resource.identity.principalId,readerRoleDefinition.id)
   scope: synapse_storage
   properties:{
     principalType: 'ServicePrincipal'
@@ -311,5 +312,17 @@ resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04
   }
 }
 
+// Grant Synapse contributor role to Datalake
+resource grant_synapse_dls_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id,synapse_workspace.name,contributorRoleDefinition.id)
+  scope: synapse_storage
+  properties:{
+    principalType: 'ServicePrincipal'
+    principalId: reference(synapse_workspace.id,'2021-06-01','Full').identity.principalId
+    roleDefinitionId: contributorRoleDefinition.id
+  }
+}
+
 
 output keyvault_name string = dataplatform_keyvault.name
+output synapse_storage_name string = synapse_storage.name
