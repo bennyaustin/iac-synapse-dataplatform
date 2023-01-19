@@ -129,6 +129,7 @@ module synapse_dp './modules/synapse-dataplatform.bicep' = {
   
 }
 
+
 //Deploy SQL control DB 
 // - SQL Server and control database for ELT framework
 
