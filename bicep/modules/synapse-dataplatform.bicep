@@ -296,3 +296,6 @@ resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04
     roleDefinitionId: readerRoleDefinition.id
   }
 }
+
+
+output keyvault_name string = dataplatform_keyvault.name

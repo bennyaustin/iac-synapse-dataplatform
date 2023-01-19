@@ -36,6 +36,7 @@ param purview_name string = 'ba-purview01'
 var synapse_deployment_name = 'synapse_dataplatform_deployment_${deployment_suffix}'
 var purview_deployment_name = 'purview_deployment_${deployment_suffix}'
 var keyvault_deployment_name = 'keyvault_deployment_${deployment_suffix}'
+var controldb_deployment_name = 'controldb_deployment_${deployment_suffix}'
 
 // Create data platform resource group
 resource synapse_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = {
@@ -95,7 +96,14 @@ resource kv_ref 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
 }
 
 // Deploy dataplatform using module
-// Deploys Synapse Analytics Workspace, Datalake, Firewall rules, Keyvault with access policies
+// Deploys the following resources
+// - Synapse Analytics Workspace
+// - Datalake
+// - Dedicated SQL Pool
+// - Spark Pools - small , medium, large, xlarge
+// - Firewall rules
+// - Keyvault with access policies
+// - Synapse link for Purview
 module synapse_dp './modules/synapse-dataplatform.bicep' = {
   name: synapse_deployment_name
   scope: synapse_rg
@@ -120,4 +128,29 @@ module synapse_dp './modules/synapse-dataplatform.bicep' = {
   
 }
 
+//Deploy SQL control DB 
+// - SQL Server and control database for ELT framework
 
+resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: synapse_dp.outputs.keyvault_name
+  scope: synapse_rg
+}
+
+module controldb './modules/sqldb.bicep' = {
+  name: controldb_deployment_name
+  scope: synapse_rg
+  params:{
+     sqlserver_name: 'ba-sql01'
+     database_name: 'controlDB' 
+     location: synapse_rg.location
+     cost_centre_tag: cost_centre_tag
+     owner_tag: owner_tag
+     sme_tag: sme_tag
+     sql_admin_username: keyvault.getSecret('sqlserver-admin-username')
+     sql_admin_password: keyvault.getSecret('sqlserver-admin-password')
+     ad_admin_username:  keyvault.getSecret('sqlserver-ad-admin-username')
+     ad_admin_sid:  keyvault.getSecret('sqlserver-ad-admin-sid')  
+     auto_pause_duration: 60
+     database_sku_name: 'GP_S_Gen5_1' 
+  }
+}
