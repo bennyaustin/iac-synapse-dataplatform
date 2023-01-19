@@ -123,6 +123,7 @@ module synapse_dp './modules/synapse-dataplatform.bicep' = {
     enable_purview: enable_purview
     purview_resourceid: purview.outputs.purview_resourceid
     purview_resource: purview.outputs.purview_resource
+    synapse_workspace_admin_sid: 'c7c5e19c-a8e9-451e-b0a5-7a38a8fce9fe' //Replace this with your AD group ID 
     
   }
   
