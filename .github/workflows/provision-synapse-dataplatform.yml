@@ -19,5 +19,5 @@ jobs:
         scope: subscription
         region: australiaeast
         subscriptionId: ${{ secrets.SUBSCRIPTION_ID }}
-        template: ./main.bicep
+        template: bicep/main.bicep
         failOnStdErr: false
