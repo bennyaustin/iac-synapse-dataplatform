@@ -12,4 +12,12 @@ jobs:
       with:
            creds: '{"clientId":"${{ secrets.ACTION_SPN_CLIENTID }}","clientSecret":"${{ secrets.ACTION_SPN_SECRET }}","subscriptionId":"${{ secrets.SUBSCRIPTION_ID }}","tenantId":"${{ secrets.TENANT_ID }}"}'
 
-
+    # Deploy Bicep file
+    - name: deploy
+      uses: azure/arm-deploy@v1
+      with:
+        scope: subscription
+        region: australiaeast
+        subscriptionId: ${{ secrets.SUBSCRIPTION_ID }}
+        template: ./main.bicep
+        failOnStdErr: false
