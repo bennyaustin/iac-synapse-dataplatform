@@ -30,6 +30,13 @@ param synapse_datalake_name string
 ])
 param synapse_datalake_sku string ='Standard_LRS'
 
+@description('Datalake containers')
+param synapse_datalake_containers array =[
+  'raw-bronze'
+  'curated-silver'
+  'curated-gold'
+]
+
 @description('Key Vault name')
 param dataplatform_keyvault_name string
 
@@ -173,6 +180,11 @@ resource synapse_storage 'Microsoft.Storage/storageAccounts@2022-09-01' ={
     minimumTlsVersion: 'TLS1_2'
   }
 } 
+
+//Create datalake containers
+resource synapse_storage_container 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = [for container in synapse_datalake_containers :{
+  name: container
+}]
 
 // Create synapse workspace
 resource synapse_workspace 'Microsoft.Synapse/workspaces@2021-06-01'= {
