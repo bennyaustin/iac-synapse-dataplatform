@@ -183,7 +183,7 @@ resource synapse_storage 'Microsoft.Storage/storageAccounts@2022-09-01' ={
 
 //Create datalake containers
 resource synapse_storage_container 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = [for container in synapse_datalake_containers :{
-  name: '${synapse_storage.name}/default/{container}'
+  name: '${synapse_storage.name}/default/${container}'
 }]
 
 // Create synapse workspace
