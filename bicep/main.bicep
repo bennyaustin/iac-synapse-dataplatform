@@ -32,6 +32,7 @@ param enable_purview bool = true
 @description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
 param purview_name string = 'ba-purview01'
 
+
 // Variables
 var synapse_deployment_name = 'synapse_dataplatform_deployment_${deployment_suffix}'
 var purview_deployment_name = 'purview_deployment_${deployment_suffix}'
@@ -124,7 +125,10 @@ module synapse_dp './modules/synapse-dataplatform.bicep' = {
     purview_resourceid: purview.outputs.purview_resourceid
     purview_resource: purview.outputs.purview_resource
     synapse_workspace_admin_sid: 'c7c5e19c-a8e9-451e-b0a5-7a38a8fce9fe' //Replace this with your AD group ID 
-    
+    enable_git: false
+    git_account: 'not applicable'
+    git_repo: 'not applicable'
+    git_collaboration_branch: 'not applicable'    
   }
   
 }

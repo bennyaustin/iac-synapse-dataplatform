@@ -155,6 +155,18 @@ param purview_resourceid string
 @description('Synapse Workspace Administrator Group ObjectID/SID')
 param synapse_workspace_admin_sid string
 
+@description('Flag to indicate whether to enable Git repository')
+param enable_git bool = false
+
+@description('GitHub Account when Git repository is enabled)')
+param git_account string
+
+@description('GitHub Repository when Git enabled)')
+param git_repo string
+
+@description('GitHub collaboration branch when Git enabled)')
+param git_collaboration_branch string = 'main'
+
 // Variables
 var suffix = uniqueString(resourceGroup().id)
 var synapse_workspace_uniquename = '${synapse_workspace_name}-${suffix}'
@@ -207,6 +219,13 @@ resource synapse_workspace 'Microsoft.Synapse/workspaces@2021-06-01'= {
         purviewConfiguration:{ purviewResourceId: enable_purview ? purview_resourceid : null }
         sqlAdministratorLogin: sqladmin_username
         sqlAdministratorLoginPassword: sqladmin_password
+        workspaceRepositoryConfiguration :{
+          accountName: enable_git ? git_account: null
+          collaborationBranch: enable_git ? git_collaboration_branch: null
+          repositoryName: enable_git ? git_repo: null
+          rootFolder: enable_git ? '/': null 
+          type: 'WorkspaceGitHubConfiguration'
+        }
         }
 }
 
