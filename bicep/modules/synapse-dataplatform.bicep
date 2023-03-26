@@ -252,7 +252,7 @@ resource synapse_keyvault_accesspolicy 'Microsoft.KeyVault/vaults/accessPolicies
   properties: {
     accessPolicies: [
       { tenantId: subscription().tenantId
-        objectId: reference(synapse_workspace.id,'2021-06-01','Full').identity.principalId
+        objectId: synapse_workspace.identity.principalId
         permissions: { secrets:  ['list','get']}
 
       }
@@ -349,7 +349,7 @@ resource grant_synapse_dls_role 'Microsoft.Authorization/roleAssignments@2022-04
   scope: synapse_storage
   properties:{
     principalType: 'ServicePrincipal'
-    principalId: reference(synapse_workspace.id,'2021-06-01','Full').identity.principalId
+    principalId: synapse_workspace.identity.principalId
     roleDefinitionId: contributorRoleDefinition.id
   }
 }
