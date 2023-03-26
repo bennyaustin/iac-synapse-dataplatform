@@ -32,10 +32,14 @@ param enable_purview bool = true
 @description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
 param purview_name string = 'ba-purview01'
 
+@description('Power BI tenant location')
+param pbilocation string = 'westus3'
+
 
 // Variables
 var synapse_deployment_name = 'synapse_dataplatform_deployment_${deployment_suffix}'
 var purview_deployment_name = 'purview_deployment_${deployment_suffix}'
+var pbi_deployment_name = 'pbi_deployment_${deployment_suffix}'
 var keyvault_deployment_name = 'keyvault_deployment_${deployment_suffix}'
 var controldb_deployment_name = 'controldb_deployment_${deployment_suffix}'
 
@@ -94,6 +98,25 @@ module kv './modules/keyvault.bicep' = {
 resource kv_ref 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: kv.outputs.keyvault_name
   scope: synapse_rg
+}
+
+
+//Deploy Power BI Integrations
+module pbi_integration './modules/pbi-integration.bicep' = {
+  name: pbi_deployment_name
+  scope: synapse_rg
+  params:{
+    location: pbilocation
+    cost_centre_tag: cost_centre_tag
+    owner_tag: owner_tag
+    sme_tag: sme_tag
+    pbi_datalake_name: 'bapbistorage02'
+    pbi_datalake_sku: 'Standard_LRS'
+    enable_purview: enable_purview
+    purview_resource: purview.outputs.purview_resource
+    pbi_admin_sid: '427bc8f2-8bf1-441b-8a24-d43e1f53698c' //Replace this with your AD group ID 
+  }
+  
 }
 
 // Deploy dataplatform using module
