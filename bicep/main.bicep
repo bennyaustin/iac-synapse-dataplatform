@@ -3,19 +3,19 @@ targetScope = 'subscription'
 
 // Parameters
 @description('Resource group where Synapse will be deployed. Resource group will be created if it doesnt exist')
-param dprg string= 'rg-synapse-dataplatform'
+param dprg string= 'prg-synapse-dataplatform'
 
 @description('Resource group location')
 param rglocation string = 'australiaeast'
 
 @description('Cost Centre tag that will be applied to all resources in this deployment')
-param cost_centre_tag string = 'Jupiter'
+param cost_centre_tag string = 'Uranus'
 
 @description('System Owner tag that will be applied to all resources in this deployment')
-param owner_tag string = 'jupiter@contoso.com'
+param owner_tag string = 'uranus@contoso.com'
 
 @description('Subject Matter EXpert (SME) tag that will be applied to all resources in this deployment')
-param sme_tag string ='saturn@contoso.com'
+param sme_tag string ='neptune@contoso.com'
 
 @description('Timestamp that will be appendedto the deployment name')
 param deployment_suffix string = utcNow()
@@ -24,13 +24,13 @@ param deployment_suffix string = utcNow()
 param purviewrg string= 'rg-datagovernance'
 
 @description('Flag to indicate whether to create a new Purview resource with this data platform deployment')
-param create_purview bool = true
+param create_purview bool = false
 
 @description('Flag to indicate whether to enable integration of data platform resources with either an existing or new Purview resource')
 param enable_purview bool = true
 
 @description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
-param purview_name string = 'ba-purview01'
+param purview_name string = 'ba-purview01-6spfx5oytiivq'
 
 @description('Power BI tenant location')
 param pbilocation string = 'westus3'
@@ -67,7 +67,7 @@ resource purview_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = if (creat
  }
 
  // Deploy Purview using module
-module purview './modules/purview.bicep' = if (create_purview) {
+module purview './modules/purview.bicep' = if (create_purview || enable_purview) {
   name: purview_deployment_name
   scope: purview_rg
   params:{
