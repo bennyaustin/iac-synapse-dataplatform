@@ -5,7 +5,7 @@ on:
     branches:
         - main
     paths:
-        - '*.bicep'
+        - '**.bicep'
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
