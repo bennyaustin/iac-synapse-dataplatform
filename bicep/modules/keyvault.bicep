@@ -36,6 +36,9 @@ resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' ={
       family: 'A'
       name: 'standard'
     }
+    enabledForDeployment: true
+    enabledForDiskEncryption: true
+    enabledForTemplateDeployment: true
     // Default Access Policies. Replace the ObjectID's with your user/group id
     accessPolicies:[
       { tenantId: subscription().tenantId

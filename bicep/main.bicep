@@ -71,7 +71,7 @@ module purview './modules/purview.bicep' = if (create_purview || enable_purview)
   name: purview_deployment_name
   scope: purview_rg
   params:{
-    create_purview: true
+    create_purview: create_purview
     purviewrg: purviewrg
     purview_name: purview_name
     location: purview_rg.location
