@@ -343,7 +343,6 @@ resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04
   }
 }
 
-
 // Grant Purview reader roles to Synapse Workspace
 resource grant_purview_synapse_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
   name: guid(resourceGroup().id,synapse_workspace.name,readerRoleDefinition.id)
