@@ -30,7 +30,7 @@ param create_purview bool = false
 param enable_purview bool = true
 
 @description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
-param purview_name string = 'ba-purview01-6spfx5oytiivq'
+param purview_name string = 'ba-purview01'
 
 @description('Power BI tenant location')
 param pbilocation string = 'westus3'
