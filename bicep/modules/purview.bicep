@@ -1,6 +1,6 @@
 // Parameters
 @description('Flag to indicate whether to create a new Purview resource with this data platform deployment')
-param create_purview bool
+param create_purview bool=false
 
 @description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
 param purview_name string
