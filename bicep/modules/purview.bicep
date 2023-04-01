@@ -45,7 +45,7 @@ resource purview_account 'Microsoft.Purview/accounts@2021-07-01'= if (create_pur
   }
   
   resource existing_purview_account 'Microsoft.Purview/accounts@2021-07-01' existing = if (!create_purview) {
-    name: purview_name
+    name: purview_uniquename
     scope: resourceGroup(purviewrg)
   }
 
