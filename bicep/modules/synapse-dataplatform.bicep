@@ -35,6 +35,7 @@ param synapse_datalake_containers array =[
   'raw-bronze'
   'curated-silver'
   'curated-gold'
+  'drop-zone'
 ]
 
 @description('Key Vault name')
