@@ -333,6 +333,19 @@ resource readerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-0
   name: 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
 }
 
+@description('This is the built-in Storage Blob Data Reader role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-reader')
+resource storageBlobDataReaderRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+}
+
+@description('This is the built-in Storage Blob Data Reader role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor')
+resource storageBlobDataContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+}
+
+
 // Grant Purview reader roles to Datalake
 resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
   name: guid(resourceGroup().id,synapse_storage.name,readerRoleDefinition.id)
@@ -356,6 +369,27 @@ resource grant_synapse_dls_role 'Microsoft.Authorization/roleAssignments@2022-04
   }
 }
 
+// Grant Synapse Storage Blob Data Reader role to Datalake
+resource grant_synapse_sbdr_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id,synapse_storage.name,storageBlobDataReaderRoleDefinition.id)
+  scope: synapse_storage
+  properties:{
+    principalType: 'ServicePrincipal'
+    principalId: synapse_workspace.identity.principalId
+    roleDefinitionId: storageBlobDataReaderRoleDefinition.id
+  }
+}
+
+// Grant Synapse Storage Blob Data Contributor role to Datalake
+resource grant_synapse_sbdc_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id,synapse_storage.name,storageBlobDataContributorRoleDefinition.id)
+  scope: synapse_storage
+  properties:{
+    principalType: 'ServicePrincipal'
+    principalId: synapse_workspace.identity.principalId
+    roleDefinitionId: storageBlobDataContributorRoleDefinition.id
+  }
+}
 
 output keyvault_name string = dataplatform_keyvault.name
 output synapse_storage_name string = synapse_storage.name
