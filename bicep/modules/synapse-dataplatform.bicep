@@ -240,6 +240,13 @@ resource synapse_workspace_firewallRules 'Microsoft.Synapse/workspaces/firewallR
   }
 }
 
+//Synapse Managed Identity SQL Control Settings
+resource synapse_sql_mi_config 'Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings@2021-06-01' ={
+  name: 'default'
+  parent: synapse_workspace
+  properties:{ grantSqlControlToManagedIdentity: {desiredState: 'Enabled'} }
+}
+
 // Create Key Vault Access Policies
 resource dataplatform_keyvault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: dataplatform_keyvault_name
