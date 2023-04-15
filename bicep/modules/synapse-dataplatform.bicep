@@ -357,29 +357,6 @@ resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04
   }
 }
 
-
-// Grant Synapse contributor role to Datalake
-resource grant_synapse_dls_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id,synapse_storage.name,contributorRoleDefinition.id)
-  scope: synapse_storage
-  properties:{
-    principalType: 'ServicePrincipal'
-    principalId: synapse_workspace.identity.principalId
-    roleDefinitionId: contributorRoleDefinition.id
-  }
-}
-
-// Grant Synapse Storage Blob Data Reader role to Datalake
-resource grant_synapse_sbdr_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id,synapse_storage.name,storageBlobDataReaderRoleDefinition.id)
-  scope: synapse_storage
-  properties:{
-    principalType: 'ServicePrincipal'
-    principalId: synapse_workspace.identity.principalId
-    roleDefinitionId: storageBlobDataReaderRoleDefinition.id
-  }
-}
-
 // Grant Synapse Storage Blob Data Contributor role to Datalake
 resource grant_synapse_sbdc_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id,synapse_storage.name,storageBlobDataContributorRoleDefinition.id)
