@@ -76,7 +76,7 @@ param spark_pools object ={
     minNodeCount: 3
     nodeSize: 'Small'
     nodeSizeFamily: 'MemoryOptimized'
-    sparkVersion: '3.1'
+    sparkVersion: '3.2'
   }
   pool2:{
     name: 'mediumMO'
@@ -84,7 +84,7 @@ param spark_pools object ={
     minNodeCount: 4
     nodeSize: 'Medium'
     nodeSizeFamily: 'MemoryOptimized'
-    sparkVersion: '3.1'
+    sparkVersion: '3.2'
   }
   pool3:{
     name: 'largeMO'
@@ -92,7 +92,7 @@ param spark_pools object ={
     minNodeCount: 6
     nodeSize: 'Large'
     nodeSizeFamily: 'MemoryOptimized'
-    sparkVersion: '3.1'
+    sparkVersion: '3.2'
   }
   pool4:{
     name: 'xlargeMO'
@@ -108,7 +108,7 @@ param spark_pools object ={
     minNodeCount: 12
     nodeSize: 'XXLarge'
     nodeSizeFamily: 'MemoryOptimized'
-    sparkVersion: '3.1'
+    sparkVersion: '3.2'
   }
   pool6:{
     name: 'smallGPU'
@@ -116,7 +116,7 @@ param spark_pools object ={
     minNodeCount: 3
     nodeSize: 'Small'
     nodeSizeFamily: 'HardwareAcceleratedGPU'
-    sparkVersion: '3.1'
+    sparkVersion: '3.2'
   }
   pool7:{
     name: 'mediumGPU'
@@ -124,7 +124,7 @@ param spark_pools object ={
     minNodeCount: 4
     nodeSize: 'Medium'
     nodeSizeFamily: 'HardwareAcceleratedGPU'
-    sparkVersion: '3.1'
+    sparkVersion: '3.2'
   }
   pool8:{
     name: 'largeGPU'
@@ -132,7 +132,7 @@ param spark_pools object ={
     minNodeCount: 6
     nodeSize: 'Large'
     nodeSizeFamily: 'HardwareAcceleratedGPU'
-    sparkVersion: '3.1'  
+    sparkVersion: '3.2'  
   }
   pool9:{
     name: 'xlargeGPU'
@@ -140,7 +140,7 @@ param spark_pools object ={
     minNodeCount: 8
     nodeSize: 'XLarge'
     nodeSizeFamily: 'HardwareAcceleratedGPU'
-    sparkVersion: '3.1' 
+    sparkVersion: '3.2' 
   }
 }
 
