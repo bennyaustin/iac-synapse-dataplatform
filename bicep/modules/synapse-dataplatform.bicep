@@ -368,7 +368,7 @@ resource storageBlobDataContributorRoleDefinition 'Microsoft.Authorization/roleD
 
 
 resource grant_purview_sbc_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
-  name: guid(resourceGroup().id,synapse_storage.name,storageBlobDataContributorRoleDefinition.id)
+  name: guid(resourceGroup().id,synapse_storage.id,storageBlobDataContributorRoleDefinition.id)
   scope: synapse_storage
   properties:{
     principalType: 'ServicePrincipal'
