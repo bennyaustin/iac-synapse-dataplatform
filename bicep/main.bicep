@@ -181,5 +181,7 @@ module controldb './modules/sqldb.bicep' = {
      ad_admin_sid:  keyvault.getSecret('sqlserver-ad-admin-sid')  
      auto_pause_duration: 60
      database_sku_name: 'GP_S_Gen5_1' 
+     enable_purview: enable_purview
+     purview_resource: purview.outputs.purview_resource
   }
 }

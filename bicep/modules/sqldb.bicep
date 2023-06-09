@@ -38,6 +38,12 @@ param database_sku_name string ='GP_S_Gen5_1'
 @description('Time in minutes after which database is automatically paused')
 param auto_pause_duration int =60
 
+@description('Flag to indicate whether to enable integration of data platform resources with either an existing or new Purview resource')
+param enable_purview bool
+
+@description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
+param purview_resource object
+
 
 // Variables
 var suffix = uniqueString(resourceGroup().id)
@@ -91,5 +97,22 @@ resource database 'Microsoft.Sql/servers/databases@2021-11-01' ={
   parent: sqlserver
   properties: {
     autoPauseDelay:auto_pause_duration
+  }
+}
+
+//Role Assignment
+@description('This is the built-in Reader role. See https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#contributor')
+resource readerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+}
+
+resource grant_purview_reader_role 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = if (enable_purview){
+  name: guid(subscription().subscriptionId, sqlserver.name, readerRoleDefinition.id)
+  scope: sqlserver
+  properties: {
+    principalType: 'ServicePrincipal'
+    principalId: purview_resource.identity.principalId
+    roleDefinitionId: readerRoleDefinition.id
   }
 }
