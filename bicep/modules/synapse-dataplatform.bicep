@@ -346,21 +346,34 @@ resource storageBlobDataReaderRoleDefinition 'Microsoft.Authorization/roleDefini
   name: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
 }
 
-@description('This is the built-in Storage Blob Data Reader role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor')
+@description('This is the built-in Storage Blob Data Contributor role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor')
 resource storageBlobDataContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
   scope: subscription()
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 }
 
 
-// Grant Purview reader roles to Datalake
-resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
-  name: guid(resourceGroup().id,synapse_storage.name,readerRoleDefinition.id)
+// Grant Purview access to Datalake
+
+
+// resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
+//   name: guid(resourceGroup().id,synapse_storage.name,readerRoleDefinition.id)
+//   scope: synapse_storage
+//   properties:{
+//     principalType: 'ServicePrincipal'
+//     principalId: purview_resource.identity.principalId
+//     roleDefinitionId: readerRoleDefinition.id
+//   }
+// }
+
+
+resource grant_purview_sbc_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
+  name: guid(resourceGroup().id,synapse_storage.name,storageBlobDataContributorRoleDefinition.id)
   scope: synapse_storage
   properties:{
     principalType: 'ServicePrincipal'
     principalId: purview_resource.identity.principalId
-    roleDefinitionId: readerRoleDefinition.id
+    roleDefinitionId: storageBlobDataContributorRoleDefinition.id
   }
 }
 
