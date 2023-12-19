@@ -183,6 +183,8 @@ module synapse_dp './modules/synapse-dataplatform.bicep' = {
     git_account: 'not applicable'
     git_repo: 'not applicable'
     git_collaboration_branch: 'not applicable'    
+    audit_storage_name: audit_integration.outputs.audit_storage_uniquename
+    auditrg: auditrg
   }
   
 }
