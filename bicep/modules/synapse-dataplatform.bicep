@@ -168,6 +168,12 @@ param git_repo string
 @description('GitHub collaboration branch when Git enabled)')
 param git_collaboration_branch string = 'main'
 
+@description('Resource name of audit storage account.')
+param audit_storage_name string
+
+@description('Resource group of audit storage account is deployed')
+param auditrg string
+
 // Variables
 var suffix = uniqueString(resourceGroup().id)
 var synapse_workspace_uniquename = '${synapse_workspace_name}-${suffix}'
@@ -326,6 +332,29 @@ resource synapse_spark_pool 'Microsoft.Synapse/workspaces/bigDataPools@2021-06-0
     sparkVersion: spark_pool.value.sparkVersion
   }
 }]
+
+//Get Reference to audit storage account
+resource audit_storage_account 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
+  name: audit_storage_name
+  scope: resourceGroup(auditrg)
+}
+
+//Enable Audit
+resource symbolicname 'Microsoft.Synapse/workspaces/extendedAuditingSettings@2021-06-01' = {
+  name: 'default'
+  parent: synapse_workspace
+  properties: {
+    auditActionsAndGroups: [ 'BATCH_COMPLETED_GROUP','SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP','FAILED_DATABASE_AUTHENTICATION_GROUP']
+    isAzureMonitorTargetEnabled: true
+    isDevopsAuditEnabled: true
+    isStorageSecondaryKeyInUse: false
+    retentionDays: 90
+    state: 'Enabled'
+    storageAccountAccessKey: audit_storage_account.listKeys().keys[0].value 
+    storageAccountSubscriptionId: subscription().subscriptionId
+    storageEndpoint: audit_storage_account.properties.primaryEndpoints.blob
+  }
+}
 
 // Role Assignment
 @description('This is the built-in Contributor role. See https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#contributor')
