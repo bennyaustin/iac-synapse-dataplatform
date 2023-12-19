@@ -44,6 +44,11 @@ param enable_purview bool
 @description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
 param purview_resource object
 
+@description('Resource name of audit storage account.')
+param audit_storage_name string
+
+@description('Resource group of audit storage account is deployed')
+param auditrg string
 
 // Variables
 var suffix = uniqueString(resourceGroup().id)
@@ -100,12 +105,36 @@ resource database 'Microsoft.Sql/servers/databases@2021-11-01' ={
   }
 }
 
+//Get Reference to audit storage account
+resource audit_storage_account 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
+  name: audit_storage_name
+  scope: resourceGroup(auditrg)
+}
+
+// Deploy audit diagnostics Azure SQL Server to storage account
+resource sqlserver_audit 'Microsoft.Sql/servers/auditingSettings@2023-05-01-preview' = {
+  name: 'default'
+  parent: sqlserver
+  properties: {
+    auditActionsAndGroups: ['BATCH_COMPLETED_GROUP','SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP','FAILED_DATABASE_AUTHENTICATION_GROUP']
+    isAzureMonitorTargetEnabled: true
+    isDevopsAuditEnabled: true
+    isManagedIdentityInUse: false
+    isStorageSecondaryKeyInUse: false
+    retentionDays: 90
+    state: 'Enabled'
+    storageAccountSubscriptionId: subscription().subscriptionId
+    storageEndpoint: audit_storage_account.properties.primaryEndpoints.blob
+    storageAccountAccessKey: audit_storage_account.listKeys().keys[0].value
+  }
+}
 //Role Assignment
 @description('This is the built-in Reader role. See https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#contributor')
 resource readerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
   scope: subscription()
   name: 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
 }
+
 
 resource grant_purview_reader_role 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = if (enable_purview){
   name: guid(subscription().subscriptionId, sqlserver.name, readerRoleDefinition.id)
@@ -116,3 +145,6 @@ resource grant_purview_reader_role 'Microsoft.Authorization/roleAssignments@2020
     roleDefinitionId: readerRoleDefinition.id
   }
 }
+
+output sqlserver_uniquename string = sqlserver.name
+output database_name string = database.name

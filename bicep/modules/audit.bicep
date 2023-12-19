@@ -55,3 +55,5 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     }
   }
 }
+
+output audit_storage_uniquename string = audit_storage_uniquename

@@ -116,6 +116,20 @@ resource kv_ref 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   scope: synapse_rg
 }
 
+//Enable auditing for data platform resources
+module audit_integration './modules/audit.bicep' = {
+  name: audit_deployment_name
+  scope: audit_rg
+  params:{
+    location: audit_rg.location
+    cost_centre_tag: cost_centre_tag
+    owner_tag: owner_tag
+    sme_tag: sme_tag
+    audit_storage_name: 'baauditstorage01'
+    audit_storage_sku: 'Standard_LRS'    
+  }
+  
+}
 
 //Deploy Power BI Integrations
 module pbi_integration './modules/pbi-integration.bicep' = {
@@ -134,29 +148,17 @@ module pbi_integration './modules/pbi-integration.bicep' = {
   }
   
 }
-module audit_integration './modules/audit.bicep' = {
-  name: audit_deployment_name
-  scope: audit_rg
-  params:{
-    location: audit_rg.location
-    cost_centre_tag: cost_centre_tag
-    owner_tag: owner_tag
-    sme_tag: sme_tag
-    audit_storage_name: 'baauditstorage01'
-    audit_storage_sku: 'Standard_LRS'    
-  }
-  
-}
 
-// Deploy dataplatform using module
-// Deploys the following resources
-// - Synapse Analytics Workspace
-// - Datalake
-// - Dedicated SQL Pool
-// - Spark Pools - small , medium, large, xlarge
-// - Firewall rules
-// - Keyvault with access policies
-// - Synapse link for Purview
+
+// // Deploy dataplatform using module
+// // Deploys the following resources
+// // - Synapse Analytics Workspace
+// // - Datalake
+// // - Dedicated SQL Pool
+// // - Spark Pools - small , medium, large, xlarge
+// // - Firewall rules
+// // - Keyvault with access policies
+// // - Synapse link for Purview
 module synapse_dp './modules/synapse-dataplatform.bicep' = {
   name: synapse_deployment_name
   scope: synapse_rg
@@ -212,5 +214,8 @@ module controldb './modules/sqldb.bicep' = {
      database_sku_name: 'GP_S_Gen5_1' 
      enable_purview: enable_purview
      purview_resource: purview.outputs.purview_resource
+     audit_storage_name: audit_integration.outputs.audit_storage_uniquename
+     auditrg: audit_rg.name
   }
 }
+
