@@ -35,6 +35,9 @@ param purview_name string = 'ba-purview01'
 @description('Power BI tenant location')
 param pbilocation string = 'westus3'
 
+@description('Resource group where audit resources will be deployed. Resource group will be created if it doesnt exist')
+param auditrg string= 'rg-audit'
+
 
 // Variables
 var synapse_deployment_name = 'synapse_dataplatform_deployment_${deployment_suffix}'
@@ -42,6 +45,7 @@ var purview_deployment_name = 'purview_deployment_${deployment_suffix}'
 var pbi_deployment_name = 'pbi_deployment_${deployment_suffix}'
 var keyvault_deployment_name = 'keyvault_deployment_${deployment_suffix}'
 var controldb_deployment_name = 'controldb_deployment_${deployment_suffix}'
+var audit_deployment_name = 'audit_deployment_${deployment_suffix}'
 
 // Create data platform resource group
 resource synapse_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = {
@@ -65,6 +69,18 @@ resource purview_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = if (creat
          SME: sme_tag
    }
  }
+
+ // Create audit resource group
+resource audit_rg  'Microsoft.Resources/resourceGroups@2023-07-01' = {
+  name: auditrg 
+  location: rglocation
+  tags: {
+         CostCentre: cost_centre_tag
+         Owner: owner_tag
+         SME: sme_tag
+   }
+ }
+
 
  // Deploy Purview using module
 module purview './modules/purview.bicep' = if (create_purview || enable_purview) {
@@ -100,6 +116,20 @@ resource kv_ref 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   scope: synapse_rg
 }
 
+//Enable auditing for data platform resources
+module audit_integration './modules/audit.bicep' = {
+  name: audit_deployment_name
+  scope: audit_rg
+  params:{
+    location: audit_rg.location
+    cost_centre_tag: cost_centre_tag
+    owner_tag: owner_tag
+    sme_tag: sme_tag
+    audit_storage_name: 'baauditstorage01'
+    audit_storage_sku: 'Standard_LRS'    
+  }
+  
+}
 
 //Deploy Power BI Integrations
 module pbi_integration './modules/pbi-integration.bicep' = {
@@ -119,15 +149,16 @@ module pbi_integration './modules/pbi-integration.bicep' = {
   
 }
 
-// Deploy dataplatform using module
-// Deploys the following resources
-// - Synapse Analytics Workspace
-// - Datalake
-// - Dedicated SQL Pool
-// - Spark Pools - small , medium, large, xlarge
-// - Firewall rules
-// - Keyvault with access policies
-// - Synapse link for Purview
+
+// // Deploy dataplatform using module
+// // Deploys the following resources
+// // - Synapse Analytics Workspace
+// // - Datalake
+// // - Dedicated SQL Pool
+// // - Spark Pools - small , medium, large, xlarge
+// // - Firewall rules
+// // - Keyvault with access policies
+// // - Synapse link for Purview
 module synapse_dp './modules/synapse-dataplatform.bicep' = {
   name: synapse_deployment_name
   scope: synapse_rg
@@ -183,5 +214,8 @@ module controldb './modules/sqldb.bicep' = {
      database_sku_name: 'GP_S_Gen5_1' 
      enable_purview: enable_purview
      purview_resource: purview.outputs.purview_resource
+     audit_storage_name: audit_integration.outputs.audit_storage_uniquename
+     auditrg: audit_rg.name
   }
 }
+
