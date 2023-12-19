@@ -35,6 +35,9 @@ param purview_name string = 'ba-purview01'
 @description('Power BI tenant location')
 param pbilocation string = 'westus3'
 
+@description('Resource group where audit resources will be deployed. Resource group will be created if it doesnt exist')
+param auditrg string= 'rg-audit'
+
 
 // Variables
 var synapse_deployment_name = 'synapse_dataplatform_deployment_${deployment_suffix}'
@@ -42,6 +45,7 @@ var purview_deployment_name = 'purview_deployment_${deployment_suffix}'
 var pbi_deployment_name = 'pbi_deployment_${deployment_suffix}'
 var keyvault_deployment_name = 'keyvault_deployment_${deployment_suffix}'
 var controldb_deployment_name = 'controldb_deployment_${deployment_suffix}'
+var audit_deployment_name = 'audit_deployment_${deployment_suffix}'
 
 // Create data platform resource group
 resource synapse_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = {
@@ -65,6 +69,18 @@ resource purview_rg  'Microsoft.Resources/resourceGroups@2022-09-01' = if (creat
          SME: sme_tag
    }
  }
+
+ // Create audit resource group
+resource audit_rg  'Microsoft.Resources/resourceGroups@2023-07-01' = {
+  name: auditrg 
+  location: rglocation
+  tags: {
+         CostCentre: cost_centre_tag
+         Owner: owner_tag
+         SME: sme_tag
+   }
+ }
+
 
  // Deploy Purview using module
 module purview './modules/purview.bicep' = if (create_purview || enable_purview) {
@@ -115,6 +131,19 @@ module pbi_integration './modules/pbi-integration.bicep' = {
     enable_purview: enable_purview
     purview_resource: purview.outputs.purview_resource
     pbi_admin_sid: '427bc8f2-8bf1-441b-8a24-d43e1f53698c' //Replace this with your AD group ID 
+  }
+  
+}
+module audit_integration './modules/audit.bicep' = {
+  name: audit_deployment_name
+  scope: audit_rg
+  params:{
+    location: audit_rg.location
+    cost_centre_tag: cost_centre_tag
+    owner_tag: owner_tag
+    sme_tag: sme_tag
+    audit_storage_name: 'baauditstorage01'
+    audit_storage_sku: 'Standard_LRS'    
   }
   
 }
