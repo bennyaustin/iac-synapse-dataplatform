@@ -27,10 +27,15 @@ param audit_storage_name string
 ])
 param audit_storage_sku string ='Standard_LRS'
 
+@description('Audit Storage name')
+param audit_loganalytics_name string
+
 // Variables
 var suffix = uniqueString(resourceGroup().id)
 var audit_storage_uniquename = substring('${audit_storage_name}${suffix}',0,24)
+var audit_loganalytics_uniquename = '${audit_loganalytics_name}-${suffix}'
 
+// Create a Storage Account for Audit Logs
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: audit_storage_uniquename
   location: location
@@ -55,5 +60,24 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     }
   }
 }
+
+// Create a Log Analytics Workspace
+resource loganalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+  name: audit_loganalytics_uniquename
+  location: location
+  tags: {
+    CostCentre: cost_centre_tag
+    Owner: owner_tag
+    SME: sme_tag
+    }
+  identity: {type: 'SystemAssigned'}
+  properties: {
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
+    retentionInDays: 30
+    sku: {name: 'PerGB2018'}
+  }
+}
+
 
 output audit_storage_uniquename string = audit_storage_uniquename

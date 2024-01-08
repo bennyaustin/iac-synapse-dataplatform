@@ -127,6 +127,7 @@ module audit_integration './modules/audit.bicep' = {
     sme_tag: sme_tag
     audit_storage_name: 'baauditstorage01'
     audit_storage_sku: 'Standard_LRS'    
+    audit_loganalytics_name: 'ba-loganalytics01'
   }
   
 }
