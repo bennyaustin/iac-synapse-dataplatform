@@ -15,6 +15,11 @@ param sme_tag string
 @description('Key Vault name')
 param keyvault_name string
 
+@description('Purview Account name')
+param purview_account_name string
+
+@description('Resource group of Purview Account')
+param purviewrg string
 
 // Variables
 var suffix = uniqueString(resourceGroup().id)
@@ -48,6 +53,26 @@ resource keyvault 'Microsoft.KeyVault/vaults@2022-07-01' ={
       { tenantId: subscription().tenantId
         objectId: '427bc8f2-8bf1-441b-8a24-d43e1f53698c' // Replace this with your user/group ObjectID
         permissions: {secrets:['list','get','set']}
+      }
+    ]
+  }
+}
+
+// Create Key Vault Access Policies for Purview
+resource existing_purview_account 'Microsoft.Purview/accounts@2021-07-01' existing = {
+    name: purview_account_name
+    scope: resourceGroup(purviewrg)
+  }
+  
+resource this_keyvault_accesspolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
+  name: 'add'
+  parent: keyvault
+  properties: {
+    accessPolicies: [
+      { tenantId: subscription().tenantId
+        objectId: existing_purview_account.identity.principalId
+        permissions: { secrets:  ['list','get']}
+
       }
     ]
   }
