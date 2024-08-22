@@ -3,7 +3,7 @@ targetScope = 'subscription'
 
 // Parameters
 @description('Resource group where Synapse will be deployed. Resource group will be created if it doesnt exist')
-param dprg string= 'prg-synapse-dataplatform'
+param dprg string= 'rg-synapse-dp'
 
 @description('Resource group location')
 param rglocation string = 'australiaeast'
@@ -30,7 +30,7 @@ param create_purview bool = false
 param enable_purview bool = true
 
 @description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
-param purview_name string = 'ba-purview01'
+param purview_name string = 'ContosoDG'
 
 @description('Power BI tenant location')
 param pbilocation string = 'westus3'
@@ -147,7 +147,7 @@ module pbi_integration './modules/pbi-integration.bicep' = {
     pbi_datalake_sku: 'Standard_LRS'
     enable_purview: enable_purview
     purview_resource: purview.outputs.purview_resource
-    pbi_admin_sid: '427bc8f2-8bf1-441b-8a24-d43e1f53698c' //Replace this with your AD group ID 
+    pbi_admin_sid: 'aca94643-2e36-4cd6-ba96-bfc513b37851' //Replace this with your AD group ID 
   }
   
 }
@@ -181,7 +181,7 @@ module synapse_dp './modules/synapse-dataplatform.bicep' = {
     enable_purview: enable_purview
     purview_resourceid: purview.outputs.purview_resourceid
     purview_resource: purview.outputs.purview_resource
-    synapse_workspace_admin_sid: 'c7c5e19c-a8e9-451e-b0a5-7a38a8fce9fe' //Replace this with your AD group ID 
+    synapse_workspace_admin_sid: 'aca94643-2e36-4cd6-ba96-bfc513b37851' //Replace this with your AD group ID 
     enable_git: false
     git_account: 'not applicable'
     git_repo: 'not applicable'
