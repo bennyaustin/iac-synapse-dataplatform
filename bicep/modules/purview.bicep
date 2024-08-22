@@ -21,8 +21,8 @@ param owner_tag string
 param sme_tag string
 
 // Variables
-var suffix = uniqueString(resourceGroup().id)
-var purview_uniquename =  '${purview_name}-${suffix}'
+// var suffix = uniqueString(resourceGroup().id)
+var purview_uniquename =  purview_name
 var managed_synapse_rg_name = 'mrg_${purview_uniquename}'
 
 
