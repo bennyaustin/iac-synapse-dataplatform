@@ -3,7 +3,7 @@ targetScope = 'subscription'
 
 // Parameters
 @description('Resource group where Synapse will be deployed. Resource group will be created if it doesnt exist')
-param dprg string= 'rg-synapse-dp'
+param dprg string= 'prg-synapse-dp'
 
 @description('Resource group location')
 param rglocation string = 'australiaeast'
