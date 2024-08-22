@@ -134,23 +134,23 @@ module audit_integration './modules/audit.bicep' = {
   
 }
 
-//Deploy Power BI Integrations
-module pbi_integration './modules/pbi-integration.bicep' = {
-  name: pbi_deployment_name
-  scope: synapse_rg
-  params:{
-    location: pbilocation
-    cost_centre_tag: cost_centre_tag
-    owner_tag: owner_tag
-    sme_tag: sme_tag
-    pbi_datalake_name: 'bapbistorage02'
-    pbi_datalake_sku: 'Standard_LRS'
-    enable_purview: enable_purview
-    purview_resource: purview.outputs.purview_resource
-    pbi_admin_sid: 'aca94643-2e36-4cd6-ba96-bfc513b37851' //Replace this with your AD group ID 
-  }
+// //Deploy Power BI Integrations
+// module pbi_integration './modules/pbi-integration.bicep' = {
+//   name: pbi_deployment_name
+//   scope: synapse_rg
+//   params:{
+//     location: pbilocation
+//     cost_centre_tag: cost_centre_tag
+//     owner_tag: owner_tag
+//     sme_tag: sme_tag
+//     pbi_datalake_name: 'bapbistorage02'
+//     pbi_datalake_sku: 'Standard_LRS'
+//     enable_purview: enable_purview
+//     purview_resource: purview.outputs.purview_resource
+//     pbi_admin_sid: 'aca94643-2e36-4cd6-ba96-bfc513b37851' //Replace this with your AD group ID 
+//   }
   
-}
+// }
 
 
 // // Deploy dataplatform using module
