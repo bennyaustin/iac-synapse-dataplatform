@@ -110,38 +110,38 @@ param spark_pools object ={
     nodeSizeFamily: 'MemoryOptimized'
     sparkVersion: '3.4'
   }
-  pool6:{
-    name: 'smallGPU'
-    maxNodeCount: 4
-    minNodeCount: 3
-    nodeSize: 'Small'
-    nodeSizeFamily: 'HardwareAcceleratedGPU'
-    sparkVersion: '3.4'
-  }
-  pool7:{
-    name: 'mediumGPU'
-    maxNodeCount: 8
-    minNodeCount: 4
-    nodeSize: 'Medium'
-    nodeSizeFamily: 'HardwareAcceleratedGPU'
-    sparkVersion: '3.4'
-  }
-  pool8:{
-    name: 'largeGPU'
-    maxNodeCount: 12
-    minNodeCount: 6
-    nodeSize: 'Large'
-    nodeSizeFamily: 'HardwareAcceleratedGPU'
-    sparkVersion: '3.4'  
-  }
-  pool9:{
-    name: 'xlargeGPU'
-    maxNodeCount: 16
-    minNodeCount: 8
-    nodeSize: 'XLarge'
-    nodeSizeFamily: 'HardwareAcceleratedGPU'
-    sparkVersion: '3.4' 
-  }
+  // pool6:{
+  //   name: 'smallGPU'
+  //   maxNodeCount: 4
+  //   minNodeCount: 3
+  //   nodeSize: 'Small'
+  //   nodeSizeFamily: 'HardwareAcceleratedGPU'
+  //   sparkVersion: '3.4'
+  // }
+  // pool7:{
+  //   name: 'mediumGPU'
+  //   maxNodeCount: 8
+  //   minNodeCount: 4
+  //   nodeSize: 'Medium'
+  //   nodeSizeFamily: 'HardwareAcceleratedGPU'
+  //   sparkVersion: '3.4'
+  // }
+  // pool8:{
+  //   name: 'largeGPU'
+  //   maxNodeCount: 12
+  //   minNodeCount: 6
+  //   nodeSize: 'Large'
+  //   nodeSizeFamily: 'HardwareAcceleratedGPU'
+  //   sparkVersion: '3.4'  
+  // }
+  // pool9:{
+  //   name: 'xlargeGPU'
+  //   maxNodeCount: 16
+  //   minNodeCount: 8
+  //   nodeSize: 'XLarge'
+  //   nodeSizeFamily: 'HardwareAcceleratedGPU'
+  //   sparkVersion: '3.4' 
+  // }
 }
 
 @description('Flag to indicate whether to enable integration of data platform resources with either an existing or new Purview resource')
