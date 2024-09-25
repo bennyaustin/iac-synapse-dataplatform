@@ -27,8 +27,14 @@ param audit_storage_name string
 ])
 param audit_storage_sku string ='Standard_LRS'
 
-@description('Audit Storage name')
+@description('Audit Log Analytics Workspace name')
 param audit_loganalytics_name string
+
+@description('Flag to indicate whether to enable integration of audit resources with either an existing or new Purview resource')
+param enable_purview bool
+
+@description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
+param purview_resource object
 
 // Variables
 var suffix = uniqueString(resourceGroup().id)
@@ -79,5 +85,22 @@ resource loganalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   }
 }
 
+// Role Assignment
+
+@description('This is the built-in Storage Blob Data Reader role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-reader')
+resource storageBlobDataReaderRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+}
+
+resource grant_purview_sbr_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
+  name: guid(resourceGroup().id,storageAccount.id,storageBlobDataReaderRoleDefinition.id)
+  scope: storageAccount
+  properties:{
+    principalType: 'ServicePrincipal'
+    principalId: purview_resource.identity.principalId
+    roleDefinitionId: storageBlobDataReaderRoleDefinition.id
+  }
+}
 
 output audit_storage_uniquename string = audit_storage_uniquename

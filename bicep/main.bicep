@@ -32,9 +32,6 @@ param enable_purview bool = true
 @description('Resource Name of new or existing Purview Account. Specify a resource name if create_purview=true or enable_purview=true')
 param purview_name string = 'ContosoDG'
 
-@description('Power BI tenant location')
-param pbilocation string = 'westus3'
-
 @description('Resource group where audit resources will be deployed. Resource group will be created if it doesnt exist')
 param auditrg string= 'rg-audit'
 
@@ -42,7 +39,6 @@ param auditrg string= 'rg-audit'
 // Variables
 var synapse_deployment_name = 'synapse_dataplatform_deployment_${deployment_suffix}'
 var purview_deployment_name = 'purview_deployment_${deployment_suffix}'
-var pbi_deployment_name = 'pbi_deployment_${deployment_suffix}'
 var keyvault_deployment_name = 'keyvault_deployment_${deployment_suffix}'
 var controldb_deployment_name = 'controldb_deployment_${deployment_suffix}'
 var audit_deployment_name = 'audit_deployment_${deployment_suffix}'
@@ -130,28 +126,11 @@ module audit_integration './modules/audit.bicep' = {
     audit_storage_name: 'baauditstorage01'
     audit_storage_sku: 'Standard_LRS'    
     audit_loganalytics_name: 'ba-loganalytics01'
+    enable_purview: true
+    purview_resource: purview.outputs.purview_resource
   }
   
 }
-
-// //Deploy Power BI Integrations
-// module pbi_integration './modules/pbi-integration.bicep' = {
-//   name: pbi_deployment_name
-//   scope: synapse_rg
-//   params:{
-//     location: pbilocation
-//     cost_centre_tag: cost_centre_tag
-//     owner_tag: owner_tag
-//     sme_tag: sme_tag
-//     pbi_datalake_name: 'bapbistorage02'
-//     pbi_datalake_sku: 'Standard_LRS'
-//     enable_purview: enable_purview
-//     purview_resource: purview.outputs.purview_resource
-//     pbi_admin_sid: 'aca94643-2e36-4cd6-ba96-bfc513b37851' //Replace this with your AD group ID 
-//   }
-  
-// }
-
 
 // // Deploy dataplatform using module
 // // Deploys the following resources
