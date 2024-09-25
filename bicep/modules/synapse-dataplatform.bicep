@@ -382,18 +382,17 @@ resource storageBlobDataContributorRoleDefinition 'Microsoft.Authorization/roleD
 }
 
 
-// Grant Purview access to Datalake
+// Grant Purview access to Synapse
 
-
-// resource grant_purview_dls_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
-//   name: guid(resourceGroup().id,synapse_storage.name,readerRoleDefinition.id)
-//   scope: synapse_storage
-//   properties:{
-//     principalType: 'ServicePrincipal'
-//     principalId: purview_resource.identity.principalId
-//     roleDefinitionId: readerRoleDefinition.id
-//   }
-// }
+resource grant_purview_reader_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
+  name: guid(resourceGroup().id,synapse_workspace.name,readerRoleDefinition.id)
+  scope: synapse_workspace
+  properties:{
+    principalType: 'ServicePrincipal'
+    principalId: purview_resource.identity.principalId
+    roleDefinitionId: readerRoleDefinition.id
+  }
+}
 
 
 resource grant_purview_sbc_role 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(enable_purview) {
